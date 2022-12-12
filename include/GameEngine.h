@@ -1,15 +1,21 @@
-#include <SDL2/SDL.h> 
-#include <SDL2/SDL_image.h> 
-#include <SDL2/SDL_mixer.h> 
-#include <SDL2/SDL_ttf.h>
+#ifndef GAMEENGINE_H
+#define GAMEENGINE_H
+
+#include <vector>
+#include "Sprite.h"
+
+using namespace std;
 
 class GameEngine {
     public:
-        GameEngine();
-        ~GameEngine();
+      void add(Sprite* sprite);
+      void remove(Sprite* sprite);
+      void run();
 
     private:
-    
-
+    vector<Sprite*> sprites;
+    vector<Sprite*> added, removed;
 
 };
+
+#endif

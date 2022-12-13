@@ -34,6 +34,7 @@ void GameEngine::run() {
     // SDL_FreeSurface(shipSurface);
 
     //här startas programmloopen
+    //const Uint8* state = SDL_GetKeyboardState(NULL);
     bool play = true;
     while (play) {
         nextTick = SDL_GetTicks() + tickInterval;
@@ -42,6 +43,30 @@ void GameEngine::run() {
         // Här kollar vi användarens input och utför funktionalitet baserat på detta
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
+            // SDL_PumpEvents();
+            
+            // if (state[SDL_SCANCODE_SPACE]) {
+            //     for(Sprite* sprite : sprites) {
+            //         sprite->spacebar();
+            //     }
+            // }
+
+            // if (event.type == SDL_QUIT) {
+            //     play = false;
+            // }
+
+            // if (state[SDL_SCANCODE_RIGHT]) {
+            //     for (Sprite* sprite : sprites) {
+            //         sprite->arrowRight();
+            //     }
+            // }
+
+            // if (state[SDL_SCANCODE_LEFT]) {
+            //     for (Sprite* sprite : sprites) {
+            //         sprite->arrowLeft();
+            //     }
+            // }
+           
             switch (event.type) {
                 case SDL_QUIT: { play = false; break; }
 
@@ -62,6 +87,21 @@ void GameEngine::run() {
 
                         //lägg till så man kan åka och skjuta samtitigt
                         case SDLK_SPACE : {
+                            break;
+                        }
+                        
+                    }
+                    break;
+                }
+                case SDL_KEYUP: {
+                    switch (event.key.keysym.sym) {
+                        case SDLK_RIGHT : { 
+                            break;
+                        }
+                        case SDLK_LEFT : {
+                            break;
+                        }
+                        case SDLK_SPACE : {
                             for(Sprite* sprite : sprites) {
                                 sprite->spacebar();
                             }
@@ -70,10 +110,12 @@ void GameEngine::run() {
                         
                     }
                     break;
-                }
 
+
+                }
             }
         }
+
 
         for (Sprite* sprite : sprites) {
             sprite->tick();
@@ -84,6 +126,18 @@ void GameEngine::run() {
             sprites.push_back(sprite);
         }
         added.clear();
+
+        for (Sprite* sprite : removed) {
+            for (vector<Sprite*>::iterator i = sprites.begin(); i != sprites.end();) {
+                if (*i == sprite) {
+                    i = sprites.erase(i);
+                }
+                else {
+                    i++;
+                }
+            }
+        }
+        removed.clear();
 
 
         // Här renderar vi allt på skärmen

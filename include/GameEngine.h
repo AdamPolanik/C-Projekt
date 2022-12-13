@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "Sprite.h"
+#include <array>
 
 using namespace std;
 

@@ -4,6 +4,8 @@
 #include "Sprite.h"
 #include "System.h"
 #include "Constants.h"
+#include <algorithm>
+#include <iostream>
 
 using namespace std;
 
@@ -34,6 +36,7 @@ void GameEngine::run() {
     // SDL_FreeSurface(shipSurface);
 
     //här startas programmloopen
+    //const Uint8 *previousState = new Uint8[SDL_NUM_SCANCODES];
     //const Uint8* state = SDL_GetKeyboardState(NULL);
     bool play = true;
     while (play) {
@@ -45,6 +48,7 @@ void GameEngine::run() {
         while (SDL_PollEvent(&event)) {
             // SDL_PumpEvents();
             
+
             // if (state[SDL_SCANCODE_SPACE]) {
             //     for(Sprite* sprite : sprites) {
             //         sprite->spacebar();
@@ -64,6 +68,26 @@ void GameEngine::run() {
             // if (state[SDL_SCANCODE_LEFT]) {
             //     for (Sprite* sprite : sprites) {
             //         sprite->arrowLeft();
+            //     }
+            // }
+
+            // if (state[SDL_SCANCODE_RIGHT] && state[SDL_SCANCODE_SPACE] && !previousState[SDL_SCANCODE_SPACE]) {
+            //     for (Sprite* sprite : sprites) {
+            //         sprite->arrowRight();
+            //         sprite->spacebar();
+            //     }
+            // }
+
+            // else if (state[SDL_SCANCODE_RIGHT] && !state[SDL_SCANCODE_SPACE] && previousState[SDL_SCANCODE_SPACE]) {
+            //     for (Sprite* sprite : sprites) {
+            //         sprite->arrowRight();
+            //     }
+            // }
+
+            // if (state[SDL_SCANCODE_LEFT] && state[SDL_SCANCODE_SPACE] ) {
+            //     for (Sprite* sprite : sprites) {
+            //         sprite->arrowLeft();
+            //         sprite->spacebar();
             //     }
             // }
            
@@ -116,9 +140,36 @@ void GameEngine::run() {
             }
         }
 
+        
+
+        //Lägg till get kordinatfunktioner i bullet och ghost!
+
 
         for (Sprite* sprite : sprites) {
             sprite->tick();
+        }
+
+        for (Sprite* bullet : sprites) {
+            if (bullet->getType() == "bullet") {
+
+                //Denna fungerar ej
+                SDL_Point p = bullet->getPosition();
+
+                for (Sprite* ghost : sprites) {
+                    if (ghost->getType() == "ghost") {
+
+                        //Denna fungerar ej
+                        SDL_Rect r = ghost->fetchArea();
+
+                        if ( (p.x >= r.x) && (p.x < (r.x + r.w)) && (p.y >= r.y) && (p.y < (r.y + r.h)) ) {
+                            ghost->isHit();
+                            //cout << r.x << "     " << r.y << endl;
+                            cout << ghost->getX() << endl;
+                        }
+                       
+                    }
+                }
+            }
         }
 
         //Lägger till allt från bufferten till huvudVectorn och rensar bufferten

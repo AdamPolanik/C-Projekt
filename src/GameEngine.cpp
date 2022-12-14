@@ -153,7 +153,8 @@ void GameEngine::run() {
             if (bullet->getType() == "bullet") {
 
                 //Denna fungerar ej
-                SDL_Point p = bullet->getPosition();
+                //SDL_Point p = bullet->getPosition();
+                Sprite* p = bullet;
 
                 for (Sprite* ghost : sprites) {
                     if (ghost->getType() == "ghost") {
@@ -161,10 +162,11 @@ void GameEngine::run() {
                         //Denna fungerar ej
                         SDL_Rect r = ghost->fetchArea();
 
-                        if ( (p.x >= r.x) && (p.x < (r.x + r.w)) && (p.y >= r.y) && (p.y < (r.y + r.h)) ) {
+                        if ( (p->getX() >= ghost->getX()) && (p->getX() < (ghost->getX() + ghost->getW())) && (p->getY() >= ghost->getY()) && (p->getY() < (ghost->getY() + ghost->getH())) ) {
                             ghost->isHit();
+                            p->remove();
                             //cout << r.x << "     " << r.y << endl;
-                            cout << ghost->getX() << endl;
+                            //cout << ghost->getX() << endl;
                         }
                        
                     }

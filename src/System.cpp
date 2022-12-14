@@ -17,7 +17,7 @@ System::System() {
     Mix_OpenAudio(20050, AUDIO_S16SYS, 2, 4096);
 
     ljud = Mix_LoadWAV( (constants::gResPath + "sounds/backgroundMusic.mp3").c_str() );
-    Mix_Volume(1, 30);
+    Mix_Volume(1, 1);
     Mix_PlayChannel(1, ljud, -1);
 
 }

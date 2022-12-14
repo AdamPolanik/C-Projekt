@@ -81,7 +81,16 @@ class Ghost : public Sprite {
         }
 
         int getX() {
-            return rect.x;
+            return rect.x -8;
+        }
+        int getY() {
+            return rect.y;
+        }
+        int getW() {
+            return rect.w;
+        }
+        int getH() {
+            return rect.h;
         }
 
         std::string getType() { return type;}
@@ -133,6 +142,9 @@ class Bullet : public Sprite {
         ~Bullet() {
             SDL_DestroyTexture(texture);
         }
+        void remove() {
+            game.remove(this);
+        }
         void draw() const {
             const SDL_Rect &rect = getRect();
             SDL_RenderCopy(sys.renderer, texture, NULL, &rect);
@@ -158,6 +170,8 @@ class Bullet : public Sprite {
         SDL_Point getPosition() {
             return position;
         }
+        int getX() { return rect.x; };
+        int getY() { return rect.y; };
 
         std::string getType() { return type;}
 

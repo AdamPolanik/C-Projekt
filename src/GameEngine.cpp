@@ -19,12 +19,34 @@ void GameEngine::remove(Sprite* sprite) {
     removed.push_back(sprite);
 }
 
+void GameEngine::checkCollision(string bulletType, string targetType, bool takesDamage) {
+        for (Sprite* bullet : sprites) {
+            if (bullet->getType() == bulletType) {
+                Sprite* b = bullet;
+
+                for (Sprite* target : sprites) {
+                    if (target->getType() == targetType) {
+                        if ( (b->getX() >= target->getX()) && (b->getX() < (target->getX() + target->getW())) && (b->getY() >= target->getY()) && (b->getY() < (target->getY() + target->getH())) ) {
+                            if (takesDamage) {
+                                target->isHit();
+                                b->remove();
+                            }
+                            else {
+                                b->remove();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+}
+
 void GameEngine::run() {
     const int tickInterval = 1000 / FPS;
     Uint32 nextTick;
     int delay;
 
-     // Här skapar vi bakgrunden
+    // Här skapar vi bakgrunden
     SDL_Surface* backgroundSurface = IMG_Load( (constants::gResPath + "images/background.png").c_str() );
     SDL_Texture* backgroundTexture = SDL_CreateTextureFromSurface(sys.renderer, backgroundSurface);
     SDL_FreeSurface(backgroundSurface);
@@ -128,51 +150,24 @@ void GameEngine::run() {
                         case SDLK_SPACE : {
                             for(Sprite* sprite : sprites) {
                                 sprite->spacebar();
+                                Mix_PlayChannel(2, sys.gunSound, 0);
                             }
                             break;
                         }
-                        
                     }
                     break;
-
-
                 }
             }
         }
-
-        
-
-        //Lägg till get kordinatfunktioner i bullet och ghost!
-
 
         for (Sprite* sprite : sprites) {
             sprite->tick();
         }
 
-        for (Sprite* bullet : sprites) {
-            if (bullet->getType() == "bullet") {
-
-                //Denna fungerar ej
-                //SDL_Point p = bullet->getPosition();
-                Sprite* p = bullet;
-
-                for (Sprite* ghost : sprites) {
-                    if (ghost->getType() == "ghost") {
-
-                        //Denna fungerar ej
-                        SDL_Rect r = ghost->fetchArea();
-
-                        if ( (p->getX() >= ghost->getX()) && (p->getX() < (ghost->getX() + ghost->getW())) && (p->getY() >= ghost->getY()) && (p->getY() < (ghost->getY() + ghost->getH())) ) {
-                            ghost->isHit();
-                            p->remove();
-                            //cout << r.x << "     " << r.y << endl;
-                            //cout << ghost->getX() << endl;
-                        }
-                       
-                    }
-                }
-            }
-        }
+        checkCollision("bullet", "ghost", true);
+        checkCollision("ghostBullet", "ship", true);
+        checkCollision("ghostBullet", "shield", true);
+        checkCollision("bullet", "shield", false);
 
         //Lägger till allt från bufferten till huvudVectorn och rensar bufferten
         for (Sprite* sprite : added) {
@@ -192,7 +187,6 @@ void GameEngine::run() {
         }
         removed.clear();
 
-
         // Här renderar vi allt på skärmen
         SDL_RenderClear(sys.renderer);
         SDL_RenderCopy(sys.renderer, backgroundTexture, NULL, NULL);
@@ -201,7 +195,6 @@ void GameEngine::run() {
             sprite->draw();
         }
 
-        //SDL_RenderCopy(sys.renderer, shipTexture, NULL, &shipRectangle);
         SDL_RenderPresent(sys.renderer);
 
         //här väntar loopen tills delay är 0
@@ -210,7 +203,6 @@ void GameEngine::run() {
             SDL_Delay(delay);
         }
     }
-
 
 }
 

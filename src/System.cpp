@@ -16,14 +16,21 @@ System::System() {
     renderer = SDL_CreateRenderer(window, -1, 0);
     Mix_OpenAudio(20050, AUDIO_S16SYS, 2, 4096);
 
-    ljud = Mix_LoadWAV( (constants::gResPath + "sounds/backgroundMusic.mp3").c_str() );
-    Mix_Volume(1, 1);
-    Mix_PlayChannel(1, ljud, -1);
+    music = Mix_LoadWAV( (constants::gResPath + "sounds/backgroundMusic.mp3").c_str() );
+    Mix_Volume(1, 10);
+    Mix_PlayChannel(1, music, -1);
 
+    gunSound = Mix_LoadWAV( (constants::gResPath + "sounds/bulletSoundShit.mp3").c_str() );
+    Mix_Volume(2, 25);
+
+    damageSound = Mix_LoadWAV( (constants::gResPath + "sounds/damageSound.mp3").c_str() );
+    Mix_Volume(3, 30);
 }
 
 System::~System() {
-    Mix_FreeChunk(ljud);
+    Mix_FreeChunk(music);
+    Mix_FreeChunk(gunSound);
+    Mix_FreeChunk(damageSound);
     Mix_CloseAudio();
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);

@@ -16,7 +16,7 @@ class Shield : public Sprite {
         static Shield* getInstance(int x) { 
             return new Shield(x);
         }
-        Shield(int x) : Sprite(x, 400, 300, 250) {
+        Shield(int x) : Sprite(x, 480, 150, 75) {
             texture = IMG_LoadTexture(sys.renderer, (constants::gResPath + "images/shieldDefault.png").c_str() );
         }
         ~Shield() {
@@ -26,34 +26,91 @@ class Shield : public Sprite {
             const SDL_Rect &rect = getRect();
             SDL_RenderCopy(sys.renderer, texture, NULL, &rect);
         }
-        void tick() {
-            counter++;
+        string getType() {
+            return type;
+        }
+        int getX() {
+            return rect.x - 10;
+        }
+        void isHit() {
+            health--;
 
-            if (counter == 500) {
+            if (health == 10) {
                 texture = IMG_LoadTexture(sys.renderer, (constants::gResPath + "images/shieldStage1.png").c_str() );
             }
-            else if (counter == 1000) {
+            else if (health == 8) {
                 texture = IMG_LoadTexture(sys.renderer, (constants::gResPath + "images/shieldStage2.png").c_str() );
             }
-            else if (counter == 1500) {
+            else if (health == 6) {
                 texture = IMG_LoadTexture(sys.renderer, (constants::gResPath + "images/shieldStage3.png").c_str() );
             }
-            else if (counter == 2000) {
+            else if (health == 4) {
                 texture = IMG_LoadTexture(sys.renderer, (constants::gResPath + "images/shieldStage4.png").c_str() );
             }
-            else if (counter == 2500) {
+            else if (health == 2) {
                 texture = IMG_LoadTexture(sys.renderer, (constants::gResPath + "images/shieldStageFinal.png").c_str() );
             }
-            else if (counter == 3000) {
+            else if (health == 0) {
                 game.remove(this);
             }
+        }
+        void tick() {
 
         }
 
     private:
     SDL_Texture* texture;
-    int counter = 0;
-    int damageCounter = 0;
+    int health = 12;
+    string type = "shield";
+};
+
+class GhostBullet : public Sprite {
+    public:
+
+        static GhostBullet* getInstance(int x, int y) {
+            return new GhostBullet(x, y);
+        }
+        GhostBullet(int x, int y) : Sprite(x, y, 20, 20) {
+            texture = IMG_LoadTexture(sys.renderer, (constants::gResPath + "images/ghostBullet.png").c_str() );
+        }
+        ~GhostBullet() {
+            SDL_DestroyTexture(texture);
+        }
+        void remove() {
+            game.remove(this);
+        }
+        void draw() const {
+            const SDL_Rect &rect = getRect();
+            SDL_RenderCopy(sys.renderer, texture, NULL, &rect);
+        }
+        void tick() {
+            counter++;
+            if (rect.y >= 630) {
+                game.remove(this);
+            }
+            else if (counter % 1 == 0) {
+                rect.y += 5;
+            }
+            updatePosition();
+        }
+        void arrowLeft() {
+        }
+        void arrowRight() {
+        }
+        void updatePosition() {
+            position.x = rect.x;
+            position.y = rect.y;
+        }
+        SDL_Point getPosition() {
+            return position;
+        }
+        std::string getType() { return type;}
+
+    private:
+        SDL_Texture* texture;
+        int counter = 0;
+        SDL_Point position;
+        string type = "ghostBullet";
 };
 
 class Ghost : public Sprite {
@@ -75,38 +132,30 @@ class Ghost : public Sprite {
         void isHit() {
             game.remove(this);
         }
-
-        SDL_Rect fetchArea() {
-            return getRect();
+        void shoot() {
+            GhostBullet* ghostBullet = GhostBullet::getInstance((rect.x + rect.w / 2) - 10, rect.y);
+            game.add(ghostBullet);
         }
 
         int getX() {
-            return rect.x -8;
-        }
-        int getY() {
-            return rect.y;
-        }
-        int getW() {
-            return rect.w;
-        }
-        int getH() {
-            return rect.h;
+            return rect.x - 10;
         }
 
         std::string getType() { return type;}
 
         void tick() {
             counter++;
+            shootCounter++;
             if (rect.y <= 0) {
                 game.remove(this);
             }
-            else if (counter % 50 == 0) {
+            else if (counter % 5 == 0) {
                 
-                if (!resetting && resetCounter != 30) {
+                if (!resetting && resetCounter != 230) {
                     rect.x++;
                     resetCounter++;
                 }
-                else if (!resetting && resetCounter == 30) {
+                else if (!resetting && resetCounter == 230) {
                     rect.y += 10;
                     resetting = true;
                 }
@@ -119,7 +168,19 @@ class Ghost : public Sprite {
                     resetting = false;
                 }
             }
-            
+
+            if (shootCounter == 1200) {
+                shootCounter = 0;
+            }
+
+            if (whenToShoot == 0) {
+                whenToShoot = rand() % 1200 + 1;
+            }
+
+            if (shootCounter == whenToShoot) {
+                shoot();
+                whenToShoot = 0;
+            }
         }
 
     private:
@@ -128,7 +189,11 @@ class Ghost : public Sprite {
     int resetCounter = 0;
     bool resetting;
     string type = "ghost";
+    int shootCounter = 0;
+    int whenToShoot = 0;
 };
+
+
 
 class Bullet : public Sprite {
     public:
@@ -170,12 +235,8 @@ class Bullet : public Sprite {
         SDL_Point getPosition() {
             return position;
         }
-        int getX() { return rect.x; };
-        int getY() { return rect.y; };
 
         std::string getType() { return type;}
-
-
 
     private:
         SDL_Texture* texture;
@@ -200,6 +261,15 @@ class Ship : public Sprite {
             SDL_RenderCopy(sys.renderer, texture, NULL, &rect);
         }
         void tick() {
+        }
+        void isHit() {
+            if (remainingLives > 0) {
+                remainingLives--;
+                Mix_PlayChannel(3, sys.damageSound, 0);
+            }
+            else {
+                game.remove(this);
+            }
 
         }
         void arrowLeft() {
@@ -212,22 +282,25 @@ class Ship : public Sprite {
             Bullet* bullet = Bullet::getInstance((rect.x + rect.w / 2) - 10);
             game.add(bullet);
         }
+        std::string getType() { return type;}
 
     private:
         SDL_Texture* texture;
+        string type = "ship";
+        int remainingLives = 3;
 
 };
 
 
 int main(int argc, char** argv) {
 
-    int x = 300;
+    int x = 100;
     int y = -20;
 
     for (int i = 0; i < 55; i++) {
         
         if (i % 11 == 0) {
-            x = 300;
+            x = 100;
             y += 65;
         }
         else {
@@ -235,13 +308,14 @@ int main(int argc, char** argv) {
         }
 
         game.add(new Ghost(x, y));
+
     }
 
     Ship* ship = new Ship();
-    game.add(new Shield(50));
-    game.add(new Shield(350));
-    game.add(new Shield(650));
-    game.add(new Shield(950));
+    game.add(new Shield(100));
+    game.add(new Shield(400));
+    game.add(new Shield(700));
+    game.add(new Shield(1000));
     game.add(ship);
     game.run();
     

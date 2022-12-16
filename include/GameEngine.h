@@ -3,7 +3,6 @@
 
 #include <vector>
 #include "Sprite.h"
-#include <array>
 
 using namespace std;
 
@@ -17,8 +16,6 @@ class GameEngine {
     private:
     vector<Sprite*> sprites;
     vector<Sprite*> added, removed;
-    vector<vector<Sprite*>> ghosts;
-
 };
 
 #endif

@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <iostream>
 
+
 using namespace std;
 
 #define FPS 60
@@ -18,6 +19,15 @@ void GameEngine::add(Sprite* sprite) {
 void GameEngine::remove(Sprite* sprite) {
     removed.push_back(sprite);
 }
+
+// void GameEngine::checkCollisions(Sprite* sprite1, Sprite* sprite2) { 
+//     for (Sprite* s : sprites) {
+//         if (Bullet* b = dynamic_cast<Bullet*> (s)) {
+            
+//             b->checkCollition(sprite2);
+//         //}
+//     }
+// }
 
 void GameEngine::checkCollision(string bulletType, string targetType, bool takesDamage) {
         for (Sprite* bullet : sprites) {
@@ -51,15 +61,7 @@ void GameEngine::run() {
     SDL_Texture* backgroundTexture = SDL_CreateTextureFromSurface(sys.renderer, backgroundSurface);
     SDL_FreeSurface(backgroundSurface);
 
-    // Här skapar vi rymdskeppet
-    // SDL_Surface* shipSurface = IMG_Load( (constants::gResPath + "images/ship.png").c_str() );
-    // SDL_Texture* shipTexture = SDL_CreateTextureFromSurface(sys.renderer, shipSurface);
-    // SDL_Rect shipRectangle = {640, 600, 55, 35};
-    // SDL_FreeSurface(shipSurface);
-
     //här startas programmloopen
-    //const Uint8 *previousState = new Uint8[SDL_NUM_SCANCODES];
-    //const Uint8* state = SDL_GetKeyboardState(NULL);
     bool play = true;
     while (play) {
         nextTick = SDL_GetTicks() + tickInterval;
@@ -68,50 +70,6 @@ void GameEngine::run() {
         // Här kollar vi användarens input och utför funktionalitet baserat på detta
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
-            // SDL_PumpEvents();
-            
-
-            // if (state[SDL_SCANCODE_SPACE]) {
-            //     for(Sprite* sprite : sprites) {
-            //         sprite->spacebar();
-            //     }
-            // }
-
-            // if (event.type == SDL_QUIT) {
-            //     play = false;
-            // }
-
-            // if (state[SDL_SCANCODE_RIGHT]) {
-            //     for (Sprite* sprite : sprites) {
-            //         sprite->arrowRight();
-            //     }
-            // }
-
-            // if (state[SDL_SCANCODE_LEFT]) {
-            //     for (Sprite* sprite : sprites) {
-            //         sprite->arrowLeft();
-            //     }
-            // }
-
-            // if (state[SDL_SCANCODE_RIGHT] && state[SDL_SCANCODE_SPACE] && !previousState[SDL_SCANCODE_SPACE]) {
-            //     for (Sprite* sprite : sprites) {
-            //         sprite->arrowRight();
-            //         sprite->spacebar();
-            //     }
-            // }
-
-            // else if (state[SDL_SCANCODE_RIGHT] && !state[SDL_SCANCODE_SPACE] && previousState[SDL_SCANCODE_SPACE]) {
-            //     for (Sprite* sprite : sprites) {
-            //         sprite->arrowRight();
-            //     }
-            // }
-
-            // if (state[SDL_SCANCODE_LEFT] && state[SDL_SCANCODE_SPACE] ) {
-            //     for (Sprite* sprite : sprites) {
-            //         sprite->arrowLeft();
-            //         sprite->spacebar();
-            //     }
-            // }
            
             switch (event.type) {
                 case SDL_QUIT: { play = false; break; }
@@ -205,5 +163,3 @@ void GameEngine::run() {
     }
 
 }
-
-

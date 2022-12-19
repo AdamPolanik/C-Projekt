@@ -1,54 +1,51 @@
 #include "GameEngine.h"
-#include <SDL2/SDL.h>
 #include <iostream>
 #include "Constants.h"
-#include <SDL2/SDL_image.h> 
 #include "System.h"
 #include "Sprite.h"
+#include "Enemy.h"
+#include "PlayableCharacter.h"
+#include "StationaryObject.h"
+#include "MovingObject.h"
 //#define FPS 60
 
 using namespace std;
 
 GameEngine game;
 
-class Shield : public Sprite {
+class Shield : public StationaryObject {
     public:
-        static Shield* getInstance(int x) { 
-            return new Shield(x);
-        }
-        Shield(int x) : Sprite(x, 480, 150, 75) {
-            texture = IMG_LoadTexture(sys.renderer, (constants::gResPath + "images/shieldDefault.png").c_str() );
-        }
-        ~Shield() {
-            SDL_DestroyTexture(texture);
-        }
-        void draw() const {
-            const SDL_Rect &rect = getRect();
-            SDL_RenderCopy(sys.renderer, texture, NULL, &rect);
-        }
-        string getType() {
-            return type;
-        }
+       
+        Shield(int x, string imagePath) : StationaryObject(x, 480, 150, 75, imagePath) {}
+
         int getX() {
             return rect.x - 10;
         }
-        void isHit() {
-            health--;
+        void isHit(Sprite* hitBy) {
+
+            if (hitBy->getType() == "ghostBullet") {
+                health--;
+                hitBy->remove();
+            }
+
+            if (hitBy->getType() == "bullet") {
+                hitBy->remove();
+            }
 
             if (health == 10) {
-                texture = IMG_LoadTexture(sys.renderer, (constants::gResPath + "images/shieldStage1.png").c_str() );
+                changeImage("images/shieldStage1.png");
             }
             else if (health == 8) {
-                texture = IMG_LoadTexture(sys.renderer, (constants::gResPath + "images/shieldStage2.png").c_str() );
+                changeImage("images/shieldStage2.png");
             }
             else if (health == 6) {
-                texture = IMG_LoadTexture(sys.renderer, (constants::gResPath + "images/shieldStage3.png").c_str() );
+                changeImage("images/shieldStage3.png");
             }
             else if (health == 4) {
-                texture = IMG_LoadTexture(sys.renderer, (constants::gResPath + "images/shieldStage4.png").c_str() );
+                changeImage("images/shieldStage4.png");
             }
             else if (health == 2) {
-                texture = IMG_LoadTexture(sys.renderer, (constants::gResPath + "images/shieldStageFinal.png").c_str() );
+                changeImage("images/shieldStageFinal.png");
             }
             else if (health == 0) {
                 game.remove(this);
@@ -59,30 +56,24 @@ class Shield : public Sprite {
         }
 
     private:
-    SDL_Texture* texture;
     int health = 12;
-    string type = "shield";
 };
 
-class GhostBullet : public Sprite {
+class GhostBullet : public MovingObject {
     public:
 
-        static GhostBullet* getInstance(int x, int y) {
-            return new GhostBullet(x, y);
+        static GhostBullet* getInstance(int x, int y, int w, int h, string imagePath, string typeName) {
+            return new GhostBullet(x, y, w, h, imagePath, typeName);
         }
-        GhostBullet(int x, int y) : Sprite(x, y, 20, 20) {
-            texture = IMG_LoadTexture(sys.renderer, (constants::gResPath + "images/ghostBullet.png").c_str() );
+
+        GhostBullet(int x, int y, int w, int h, string imagePath, string typeName) : MovingObject(x, y, w, h, imagePath, typeName) {
+            type = typeName;
         }
-        ~GhostBullet() {
-            SDL_DestroyTexture(texture);
-        }
+
         void remove() {
             game.remove(this);
         }
-        void draw() const {
-            const SDL_Rect &rect = getRect();
-            SDL_RenderCopy(sys.renderer, texture, NULL, &rect);
-        }
+
         void tick() {
             counter++;
             if (rect.y >= 630) {
@@ -93,55 +84,33 @@ class GhostBullet : public Sprite {
             }
             updatePosition();
         }
-        void arrowLeft() {
-        }
-        void arrowRight() {
-        }
-        void updatePosition() {
-            position.x = rect.x;
-            position.y = rect.y;
-        }
-        SDL_Point getPosition() {
-            return position;
-        }
+
         std::string getType() { return type;}
 
     private:
-        SDL_Texture* texture;
         int counter = 0;
-        SDL_Point position;
-        string type = "ghostBullet";
+        string type;
 };
 
-class Ghost : public Sprite {
+class Ghost : public Enemy {
     public:
-        static Ghost* getInstance(int x, int y) { 
-            return new Ghost(x, y);
-        }
-        Ghost(int x, int y) : Sprite(x, y, 55, 35) {
-            texture = IMG_LoadTexture(sys.renderer, (constants::gResPath + "images/Ghost.png").c_str() );
-        }
-        ~Ghost() {
-            SDL_DestroyTexture(texture);
-        }
-        void draw() const {
-            const SDL_Rect &rect = getRect();
-            SDL_RenderCopy(sys.renderer, texture, NULL, &rect);
-        }
-
-        void isHit() {
-            game.remove(this);
+        Ghost(int x, int y, int w, int h, string imagePath) : Enemy(x, y, 55, 35, "images/Ghost.png") {}
+     
+        void isHit(Sprite* hitBy) {
+            if (hitBy->getType() == "bullet") {
+                game.remove(this);
+                hitBy->remove();
+            }
+            
         }
         void shoot() {
-            GhostBullet* ghostBullet = GhostBullet::getInstance((rect.x + rect.w / 2) - 10, rect.y);
+            GhostBullet* ghostBullet = GhostBullet::getInstance((rect.x + rect.w / 2) - 10, rect.y, 20, 20, "images/ghostBullet.png", "ghostBullet");
             game.add(ghostBullet);
         }
 
         int getX() {
             return rect.x - 10;
         }
-
-        std::string getType() { return type;}
 
         void tick() {
             counter++;
@@ -184,36 +153,31 @@ class Ghost : public Sprite {
         }
 
     private:
-    SDL_Texture* texture;
     int counter = 0;
     int resetCounter = 0;
     bool resetting;
-    string type = "ghost";
     int shootCounter = 0;
     int whenToShoot = 0;
 };
 
 
 
-class Bullet : public Sprite {
+class Bullet : public MovingObject {
     public:
 
-        static Bullet* getInstance(int x) {
-            return new Bullet(x);
+        static Bullet* getInstance(int x, int y, int w, int h,string imagePath, string typeName) {
+            return new Bullet(x, y, w, h, imagePath, typeName);
         }
-        Bullet(int x) : Sprite(x, 600, 20, 20) {
-            texture = IMG_LoadTexture(sys.renderer, (constants::gResPath + "images/bullet.png").c_str() );
+
+        //600, 20, 20,
+        Bullet(int x, int y, int w, int h, string imagePath, string typeName) : MovingObject(x, y, w, h, imagePath, typeName) {
+            type = typeName;
         }
-        ~Bullet() {
-            SDL_DestroyTexture(texture);
-        }
+   
         void remove() {
             game.remove(this);
         }
-        void draw() const {
-            const SDL_Rect &rect = getRect();
-            SDL_RenderCopy(sys.renderer, texture, NULL, &rect);
-        }
+
         void tick() {
             counter++;
             if (rect.y <= 0) {
@@ -224,71 +188,42 @@ class Bullet : public Sprite {
             }
             updatePosition();
         }
-        void arrowLeft() {
-        }
-        void arrowRight() {
-        }
-        void updatePosition() {
-            position.x = rect.x;
-            position.y = rect.y;
-        }
-        SDL_Point getPosition() {
-            return position;
-        }
 
-        std::string getType() { return type;}
+        string getType() {return type;}
 
     private:
-        SDL_Texture* texture;
         int counter = 0;
-        SDL_Point position;
-        string type = "bullet";
+        string type;
 };
 
-class Ship : public Sprite {
+class Ship : public PlayableCharacter {
     public:
-        static Ship* getInstance() {
-            return new Ship();
-        }
-        Ship() : Sprite(640, 600, 55, 35) {
-            texture = IMG_LoadTexture(sys.renderer, (constants::gResPath + "images/ship.png").c_str() );
-        }
-        ~Ship() {
-            SDL_DestroyTexture(texture);
-        }
-        void draw() const {
-            const SDL_Rect &rect = getRect();
-            SDL_RenderCopy(sys.renderer, texture, NULL, &rect);
-        }
+
+        Ship(string imagePath) : PlayableCharacter(640, 600, 55, 35, imagePath) {}
+
         void tick() {
         }
-        void isHit() {
-            if (remainingLives > 0) {
-                remainingLives--;
-                Mix_PlayChannel(3, sys.damageSound, 0);
-            }
-            else {
-                game.remove(this);
-            }
 
+        void isHit(Sprite* hitBy) {
+            if (remainingLives > 0 && hitBy->getType() == "ghostBullet") {
+                remainingLives--;
+                playSound("sounds/damageSound.mp3");
+                hitBy->remove();
+            }
+            else if (hitBy->getType() == "ghostBullet") {
+                game.remove(this);
+                hitBy->remove();
+            }
         }
-        void arrowLeft() {
-            rect.x = rect.x - 10;
-        }
-         void arrowRight() {
-            rect.x = rect.x + 10;
-        }
+
         void spacebar() {
-            Bullet* bullet = Bullet::getInstance((rect.x + rect.w / 2) - 10);
+            //ImagePath ska läggas till
+            Bullet* bullet = Bullet::getInstance((rect.x + rect.w / 2) - 10, 600, 20, 20, "images/bullet.png", "bullet");
             game.add(bullet);
         }
-        std::string getType() { return type;}
 
     private:
-        SDL_Texture* texture;
-        string type = "ship";
         int remainingLives = 3;
-
 };
 
 
@@ -307,15 +242,15 @@ int main(int argc, char** argv) {
             x += 80;
         }
 
-        game.add(new Ghost(x, y));
+        game.add(new Ghost(x, y, 55, 35, "images/Ghost.png"));
 
     }
 
-    Ship* ship = new Ship();
-    game.add(new Shield(100));
-    game.add(new Shield(400));
-    game.add(new Shield(700));
-    game.add(new Shield(1000));
+    Ship* ship = new Ship("images/ship.png");
+    game.add(new Shield(100, "images/shieldDefault.png"));
+    game.add(new Shield(400, "images/shieldDefault.png"));
+    game.add(new Shield(700, "images/shieldDefault.png"));
+    game.add(new Shield(1000, "images/shieldDefault.png"));
     game.add(ship);
     game.run();
     

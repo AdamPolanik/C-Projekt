@@ -10,7 +10,7 @@ class GameEngine {
     public:
       void add(Sprite* sprite);
       void remove(Sprite* sprite);
-      void checkCollision(string bulletType, string targetType, bool takesDamage);
+      void checkCollisions();
       void run();
 
     private:

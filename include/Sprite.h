@@ -3,25 +3,28 @@
 
 #include <SDL2/SDL.h>
 #include <string>
+#include <SDL2/SDL_mixer.h>
+
+using namespace std;
 
 class Sprite
 {
 protected:
-    Sprite(int x, int y, int width, int height) : rect{x, y, width, height} {}
+    Sprite(int x, int y, int w, int h, string imagePath);
     SDL_Rect rect;
-    SDL_Rect hitArea;
     SDL_Point position;
     std::string type;
 
 public:
+    virtual ~Sprite();
     virtual void draw() const = 0;
-    SDL_Rect getRect() const { return rect; }
+    const SDL_Rect getRect() const { return rect; }
     virtual void tick() = 0;
     virtual void arrowLeft() {}
     virtual void arrowRight() {}
     virtual void spacebar() {}
     virtual void spacebarUp() {}
-    virtual void isHit() {}
+    virtual void isHit(Sprite* hitBy) {}
     virtual void remove() {}
     void updatePosition() {}
     SDL_Point getPosition() {return position;}
@@ -31,6 +34,7 @@ public:
     virtual int getW() {return rect.w;}
     virtual int getH() {return rect.h;}
     virtual void shoot() {}
+    virtual void playSound(string soundPath) {}
 };
 
 #endif

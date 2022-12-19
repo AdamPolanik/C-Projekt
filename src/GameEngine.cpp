@@ -6,6 +6,7 @@
 #include "Constants.h"
 #include <algorithm>
 #include <iostream>
+#include "MovingObject.h"
 
 
 using namespace std;
@@ -20,35 +21,16 @@ void GameEngine::remove(Sprite* sprite) {
     removed.push_back(sprite);
 }
 
-// void GameEngine::checkCollisions(Sprite* sprite1, Sprite* sprite2) { 
-//     for (Sprite* s : sprites) {
-//         if (Bullet* b = dynamic_cast<Bullet*> (s)) {
-            
-//             b->checkCollition(sprite2);
-//         //}
-//     }
-// }
-
-void GameEngine::checkCollision(string bulletType, string targetType, bool takesDamage) {
-        for (Sprite* bullet : sprites) {
-            if (bullet->getType() == bulletType) {
-                Sprite* b = bullet;
-
-                for (Sprite* target : sprites) {
-                    if (target->getType() == targetType) {
-                        if ( (b->getX() >= target->getX()) && (b->getX() < (target->getX() + target->getW())) && (b->getY() >= target->getY()) && (b->getY() < (target->getY() + target->getH())) ) {
-                            if (takesDamage) {
-                                target->isHit();
-                                b->remove();
-                            }
-                            else {
-                                b->remove();
-                            }
-                        }
-                    }
+void GameEngine::checkCollisions() { 
+    for (Sprite* s : sprites) {
+        if (MovingObject* b = dynamic_cast<MovingObject*> (s)) {
+            for (Sprite* target : sprites) {
+                if (b != target && b->checkCollision(target)) {
+                target->isHit(b);
                 }
             }
         }
+    }
 }
 
 void GameEngine::run() {
@@ -122,10 +104,7 @@ void GameEngine::run() {
             sprite->tick();
         }
 
-        checkCollision("bullet", "ghost", true);
-        checkCollision("ghostBullet", "ship", true);
-        checkCollision("ghostBullet", "shield", true);
-        checkCollision("bullet", "shield", false);
+        checkCollisions();
 
         //Lägger till allt från bufferten till huvudVectorn och rensar bufferten
         for (Sprite* sprite : added) {

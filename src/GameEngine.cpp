@@ -116,6 +116,7 @@ void GameEngine::run() {
             for (vector<Sprite*>::iterator i = sprites.begin(); i != sprites.end();) {
                 if (*i == sprite) {
                     i = sprites.erase(i);
+                    sprite->~Sprite();
                 }
                 else {
                     i++;

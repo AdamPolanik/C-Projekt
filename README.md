@@ -23,3 +23,6 @@ The Shields:
 - Protects the ship.
 - Takes damage if hit by a ghost shot.
 - Gets removed if hit enough times.
+
+![Screenshot1](https://raw.githubusercontent.com/AdamPolanik/C-Projekt/master/Screenshot1.png?token=GHSAT0AAAAAACLHQDKG337WZ5RHUH5NYZXGZL3GPEA)
+![Screenshot1](https://raw.githubusercontent.com/AdamPolanik/C-Projekt/master/Screenshot2.png?token=GHSAT0AAAAAACLHQDKHUSZS2PDIKEZN7VFMZL3GQLA)
